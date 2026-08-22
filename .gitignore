@@ -1,3 +1,6 @@
+# JetBrains IDEs
+.idea/
+
 # Logs
 logs
 *.log
@@ -80,7 +83,13 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
-dist
+
+# Build output: ignored by default, except the self-contained UMD build,
+# which is committed so it can be downloaded directly from the repo as an
+# alternative to the CDN/npm install.
+/dist/*
+!/dist/dhivehigpt-player.umd.min.js
+examples/*/dist/
 .output
 
 # Gatsby files

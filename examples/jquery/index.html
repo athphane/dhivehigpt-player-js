@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>DhivehiGPT Player — jQuery example</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body style="font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px;">
+  <h1>jQuery example</h1>
+  <p>
+    <code>$.fn.dhivehigptPlayer</code> lives in a separate small add-on file, kept out of the
+    core player script so sites that don't use jQuery aren't shipped its bytes — register it
+    with one extra <code>&lt;script type="module"&gt;</code>.
+  </p>
+
+  <audio id="my-audio" src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"></audio>
+
+  <div style="margin-top: 16px; display: flex; gap: 8px;">
+    <button type="button" id="play">Play</button>
+    <button type="button" id="pause">Pause</button>
+    <button type="button" id="rate">Cycle speed</button>
+  </div>
+
+  <pre id="log" style="margin-top: 16px; background: #f4f4f4; padding: 12px; border-radius: 8px; height: 140px; overflow: auto;"></pre>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@javaabu/dhivehigpt-player/dist/dhivehigpt-player.umd.min.js"></script>
+  <script type="module">
+    // Note: this whole block is one module script (rather than a separate
+    // registerJQueryPlugin module + a plain script after it) deliberately —
+    // module scripts are deferred, classic scripts aren't, so a plain
+    // <script> placed after this one could run before registration finishes.
+    import { registerJQueryPlugin } from 'https://cdn.jsdelivr.net/npm/@javaabu/dhivehigpt-player/dist/jquery/dhivehigpt-player-jquery.js';
+    registerJQueryPlugin(window.jQuery);
+
+    const log = (msg) => {
+      const el = document.getElementById('log');
+      el.textContent += msg + '\n';
+      el.scrollTop = el.scrollHeight;
+    };
+
+    $('#my-audio').dhivehigptPlayer({ accent: true });
+
+    const player = $('#my-audio').data('dhivehigptPlayer');
+    player.on('play', () => log('play'));
+    player.on('pause', () => log('pause'));
+    player.on('ratechange', ({ rate }) => log(`ratechange: ${rate}x`));
+
+    $('#play').on('click', () => $('#my-audio').dhivehigptPlayer('play'));
+    $('#pause').on('click', () => $('#my-audio').dhivehigptPlayer('pause'));
+    $('#rate').on('click', () => $('#my-audio').dhivehigptPlayer('cyclePlaybackRate'));
+  </script>
+</body>
+</html>

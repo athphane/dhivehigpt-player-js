@@ -1,0 +1,11 @@
+{
+    "position": 1.3,
+    "label": "Modules",
+    "collapsible": true,
+    "collapsed": false,
+    "link": {
+        "type": "generated-index",
+        "slug": "/dhivehigpt-player-js/_categories/modules",
+        "description": "Details of all the modules offered by DhivehiGPT Player"
+    }
+}

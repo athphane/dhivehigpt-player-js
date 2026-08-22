@@ -1,0 +1,5 @@
+{
+    "name": "DhivehiGPT Player",
+    "description": "Lightweight, dependency-free audio player for DhivehiGPT-generated read-aloud audio",
+    "version": "1"
+}

@@ -1,0 +1,116 @@
+{
+  "name": "@javaabu/dhivehigpt-player",
+  "version": "1.0.0",
+  "description": "Lightweight, dependency-free custom audio player for DhivehiGPT-generated read-aloud audio, embeddable on any website",
+  "type": "module",
+  "main": "./dist/dhivehigpt-player.cjs",
+  "module": "./dist/dhivehigpt-player.js",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/dhivehigpt-player.umd.min.js",
+  "jsdelivr": "./dist/dhivehigpt-player.umd.min.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/dhivehigpt-player.js",
+      "require": "./dist/dhivehigpt-player.cjs"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/dhivehigpt-player-react.js",
+      "require": "./dist/react/dhivehigpt-player-react.cjs"
+    },
+    "./vue": {
+      "types": "./dist/vue/index.d.ts",
+      "import": "./dist/vue/dhivehigpt-player-vue.js",
+      "require": "./dist/vue/dhivehigpt-player-vue.cjs"
+    },
+    "./jquery": {
+      "types": "./dist/jquery/index.d.ts",
+      "import": "./dist/jquery/dhivehigpt-player-jquery.js",
+      "require": "./dist/jquery/dhivehigpt-player-jquery.cjs"
+    },
+    "./svelte": "./dist/svelte/DhivehiGPTPlayer.svelte",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "tsc --noEmit -p tsconfig.json && vite build && vite build --config vite.umd.config.ts && node scripts/copy-svelte.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "keywords": [
+    "audio",
+    "audio-player",
+    "player",
+    "dhivehigpt",
+    "read-aloud",
+    "text-to-speech",
+    "tts"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Javaabu/dhivehigpt-player-js.git"
+  },
+  "author": {
+    "name": "Javaabu Pvt. Ltd.",
+    "url": "https://github.com/javaabu"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Javaabu/dhivehigpt-player-js/issues"
+  },
+  "homepage": "https://github.com/Javaabu/dhivehigpt-player-js#readme",
+  "peerDependencies": {
+    "jquery": ">=3.0.0",
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0",
+    "svelte": ">=3.0.0",
+    "vue": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "jquery": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "svelte": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^3.1.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/svelte": "^4.1.0",
+    "@testing-library/vue": "^8.1.0",
+    "@types/jquery": "^3.5.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "@vitest/coverage-v8": "^2.1.0",
+    "jquery": "^3.7.0",
+    "jsdom": "^25.0.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "svelte": "^4.2.0",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.0",
+    "vite-plugin-dts": "^4.2.0",
+    "vitest": "^2.1.0",
+    "vue": "^3.5.0"
+  }
+}

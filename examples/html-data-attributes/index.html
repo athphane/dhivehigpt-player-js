@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>DhivehiGPT Player — Data attributes example</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body style="font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px;">
+  <h1>Data attributes example</h1>
+  <p>Every option configured entirely through <code>data-*</code> attributes — no JS of your own required.</p>
+
+  <h2>Default (light)</h2>
+  <audio
+    data-dhivehigpt-player
+    src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
+  ></audio>
+
+  <h2>Accent skin</h2>
+  <audio
+    data-dhivehigpt-player
+    data-accent="true"
+    src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
+  ></audio>
+
+  <h2>Forced dark</h2>
+  <audio
+    data-dhivehigpt-player
+    data-dark="true"
+    data-shadow="lift"
+    src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
+  ></audio>
+
+  <h2>Minimal controls (no time/speed/volume)</h2>
+  <audio
+    data-dhivehigpt-player
+    data-show-time="false"
+    data-show-speed="false"
+    data-show-volume="false"
+    src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
+  ></audio>
+
+  <h2>Custom speeds</h2>
+  <audio
+    data-dhivehigpt-player
+    data-speeds="0.5,1,1.5,2,3"
+    src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
+  ></audio>
+
+  <h2>Sticky-to-bottom while playing</h2>
+  <p>Press play, then scroll — the bar slides up and sticks to the bottom of the screen, and stays there through pause. Use the stop button to dismiss it.</p>
+  <audio
+    data-dhivehigpt-player
+    data-sticky="true"
+    src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
+  ></audio>
+  <div style="height: 1200px"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@javaabu/dhivehigpt-player/dist/dhivehigpt-player.umd.min.js"></script>
+</body>
+</html>

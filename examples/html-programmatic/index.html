@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>DhivehiGPT Player — Programmatic example</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body style="font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px;">
+  <h1>Programmatic example</h1>
+  <p>Initialize and control the player entirely from JavaScript, with an event log.</p>
+
+  <audio id="my-audio" src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"></audio>
+
+  <div style="margin-top: 16px; display: flex; gap: 8px;">
+    <button id="play">Play</button>
+    <button id="pause">Pause</button>
+    <button id="rate">Cycle speed</button>
+  </div>
+
+  <pre id="log" style="margin-top: 16px; background: #f4f4f4; padding: 12px; border-radius: 8px; height: 140px; overflow: auto;"></pre>
+
+  <script src="https://cdn.jsdelivr.net/npm/@javaabu/dhivehigpt-player/dist/dhivehigpt-player.umd.min.js"></script>
+  <script>
+    const log = (msg) => {
+      const el = document.getElementById('log');
+      el.textContent += msg + '\n';
+      el.scrollTop = el.scrollHeight;
+    };
+
+    // The UMD build auto-converts audio[data-dhivehigpt-player] elements,
+    // but here we opt out of that and create the player ourselves instead.
+    const player = new window.DhivehiGPTPlayer.AudioPlayer('#my-audio', {
+      accent: true,
+      sticky: false,
+    });
+
+    player.on('play', () => log('play'));
+    player.on('pause', () => log('pause'));
+    player.on('ended', () => log('ended'));
+    player.on('ratechange', ({ rate }) => log(`ratechange: ${rate}x`));
+    player.on('volumechange', ({ volume }) => log(`volumechange: ${volume.toFixed(2)}`));
+
+    document.getElementById('play').addEventListener('click', () => player.play());
+    document.getElementById('pause').addEventListener('click', () => player.pause());
+    document.getElementById('rate').addEventListener('click', () => player.cyclePlaybackRate());
+  </script>
+</body>
+</html>
