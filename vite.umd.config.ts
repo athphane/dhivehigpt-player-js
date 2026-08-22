@@ -8,6 +8,9 @@ export default defineConfig({
     __DHIVEHIGPT_PLAYER_AUTO_INIT__: 'true',
   },
   build: {
+    // Runs *after* vite.config.ts in `npm run build` and must not wipe
+    // what that step just produced — this file's fixed name (no content
+    // hash) means it's safely overwritten in place on every build anyway.
     emptyOutDir: false,
     // This is the file embedded directly via <script src="..."> on
     // third-party sites with no further transpilation — keep it running on

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Lightweight, dependency-free custom audio player for DhivehiGPT-generated read-aloud audio, embeddable on any website",
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/dhivehigpt-player.cjs",
   "module": "./dist/dhivehigpt-player.js",
   "types": "./dist/index.d.ts",

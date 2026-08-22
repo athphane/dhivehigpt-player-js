@@ -29,7 +29,15 @@ export default defineConfig({
     __DHIVEHIGPT_PLAYER_AUTO_INIT__: 'false',
   },
   build: {
-    emptyOutDir: false,
+    // This is the *first* of the two build steps in `npm run build` — it
+    // should start from a clean dist/, otherwise every rebuild leaves
+    // behind the previous run's hashed chunk files (Vite's chunk names
+    // include a content hash, so they never get overwritten, only
+    // accumulated) and that cruft ends up published to npm. The second
+    // step (vite.umd.config.ts) sets this to false instead, since it
+    // needs to add its single file to what this step just produced
+    // without wiping it.
+    emptyOutDir: true,
     // Most bundlers don't transpile node_modules by default, so a published
     // package shipping untranspiled modern syntax can still break consumers
     // on older browsers. es2017 covers Safari 10.1+/Chrome 58+/Firefox 52+/
