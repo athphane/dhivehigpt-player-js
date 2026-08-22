@@ -5,7 +5,7 @@
 [![Coverage](https://raw.githubusercontent.com/Javaabu/dhivehigpt-player-js/main/badges/coverage.svg)](https://github.com/Javaabu/dhivehigpt-player-js/actions/workflows/tests.yml)
 [![License](https://img.shields.io/npm/l/%40javaabu%2Fdhivehigpt-player.svg)](LICENSE.md)
 
-A lightweight, dependency-free audio player for [DhivehiGPT](https://dhivehigpt.com)-generated "read aloud" audio. Turns a plain `<audio>` tag into a branded control bar, embeddable on any website — no build step required.
+A lightweight, dependency-free audio player for [DhivehiGPT](https://dhivehigpt.com)-generated "read aloud" audio. Turns a plain `<audio>` tag into a branded control bar, embeddable on any website — no build step required. Built for modern evergreen browsers (Safari 10.1+/Chrome 58+/Firefox 52+/Edge 15+ — see [requirements](https://docs.javaabu.com/docs/dhivehigpt-player-js/requirements)).
 
 **[Live demo](https://javaabu.github.io/dhivehigpt-player-js/)**
 

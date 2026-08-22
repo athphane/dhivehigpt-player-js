@@ -201,6 +201,26 @@ describe('AudioPlayer', () => {
     player.destroy();
   });
 
+  it('does not rewrite the play/pause icon or speed label on timeupdate when they have not changed (avoids needless work on every tick)', () => {
+    const player = new AudioPlayer(audio);
+    fireLoadedMetadata(audio, 100);
+    fireTimeUpdate(audio, 10);
+
+    const btn = q<HTMLButtonElement>(player, '.dhivehigpt-player__btn');
+    const speed = q<HTMLButtonElement>(player, '.dhivehigpt-player__speed');
+    const btnInnerHTMLSetter = vi.spyOn(btn, 'innerHTML', 'set');
+    const speedTextContentSetter = vi.spyOn(speed, 'textContent', 'set');
+
+    // Only currentTime changes here — play state and rate are unchanged.
+    fireTimeUpdate(audio, 11);
+    fireTimeUpdate(audio, 12);
+
+    expect(btnInnerHTMLSetter).not.toHaveBeenCalled();
+    expect(speedTextContentSetter).not.toHaveBeenCalled();
+
+    player.destroy();
+  });
+
   it('updates the time label and seek fill on timeupdate', () => {
     const player = new AudioPlayer(audio);
     fireLoadedMetadata(audio, 100);

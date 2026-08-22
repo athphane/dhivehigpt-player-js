@@ -9,9 +9,10 @@ const INITIALIZED_ATTR = 'data-dhivehigpt-player-initialized';
 // explicitly on destroy/reconcile, so this doesn't leak.
 const instances = new Map<HTMLAudioElement, AudioPlayer>();
 
-function selector(): string {
-  return `audio[${PLAYER_ATTR}]:not([${INITIALIZED_ATTR}])`;
-}
+// Built once rather than on every call — this is re-evaluated for every
+// node in every MutationObserver batch while watch() is active, so it's
+// worth not re-concatenating the same string each time.
+const SELECTOR = `audio[${PLAYER_ATTR}]:not([${INITIALIZED_ATTR}])`;
 
 function initElement(el: HTMLAudioElement): AudioPlayer {
   el.setAttribute(INITIALIZED_ATTR, '');
@@ -27,7 +28,7 @@ function initElement(el: HTMLAudioElement): AudioPlayer {
  * skipped. Returns the players created by this call.
  */
 export function init(root: ParentNode = document): AudioPlayer[] {
-  const elements = Array.from(root.querySelectorAll<HTMLAudioElement>(selector()));
+  const elements = Array.from(root.querySelectorAll<HTMLAudioElement>(SELECTOR));
   return elements.map(initElement);
 }
 
@@ -56,6 +57,12 @@ export function getInstance(el: HTMLAudioElement): AudioPlayer | undefined {
  *    is torn down and the host is converted again from scratch.
  */
 function reconcile(): void {
+  // Nothing to reconcile — skip the snapshot/iteration below entirely so
+  // an unrelated MutationObserver batch (e.g. from some other widget on
+  // the page constantly touching the DOM) doesn't do pointless work here
+  // once there are no players left to check.
+  if (instances.size === 0) return;
+
   // Snapshot first: reconciling an entry can insert a fresh replacement
   // back into `instances`, which would otherwise be visible to this same
   // iteration since we're mutating the map we're iterating over.
@@ -90,8 +97,8 @@ export function watch(root: Node = document.body): void {
     for (const mutation of mutations) {
       mutation.addedNodes.forEach((node) => {
         if (!(node instanceof Element)) return;
-        if (node.matches(selector())) initElement(node as HTMLAudioElement);
-        node.querySelectorAll?.(selector()).forEach((el) => initElement(el as HTMLAudioElement));
+        if (node.matches(SELECTOR)) initElement(node as HTMLAudioElement);
+        node.querySelectorAll?.(SELECTOR).forEach((el) => initElement(el as HTMLAudioElement));
       });
     }
     reconcile();

@@ -35,6 +35,13 @@ export function DhivehiGPTPlayer({
 }: DhivehiGPTPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  // A caller passing an inline array literal (very common — e.g.
+  // `speeds={[1, 1.5, 2]}`) gets a new array reference every render even
+  // when the values don't change. Using `speeds` itself as a useEffect
+  // dependency would then destroy and rebuild the whole player (losing
+  // playback position) on every unrelated re-render; depending on this
+  // derived string instead only reacts to the values actually changing.
+  const speedsKey = speeds?.join(',');
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -58,7 +65,7 @@ export function DhivehiGPTPlayer({
 
     return () => player.destroy();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src, dark, accent, shadow, flush, showTime, showSpeed, showVolume, speeds, sticky, loadFont]);
+  }, [src, dark, accent, shadow, flush, showTime, showSpeed, showVolume, speedsKey, sticky, loadFont]);
 
   return (
     <div className={className}>

@@ -60,6 +60,11 @@ export const DhivehiGPTPlayer = defineComponent({
     onMounted(create);
     onBeforeUnmount(destroy);
 
+    const recreate = () => {
+      destroy();
+      create();
+    };
+
     watch(
       () => [
         props.src,
@@ -70,15 +75,24 @@ export const DhivehiGPTPlayer = defineComponent({
         props.showTime,
         props.showSpeed,
         props.showVolume,
-        props.speeds,
         props.sticky,
         props.loadFont,
       ],
-      () => {
-        destroy();
-        create();
-      },
+      recreate,
     );
+
+    // Watched separately, as its own primitive (string) source, rather than
+    // folded into the array above: Vue's watch decides whether to fire
+    // based on the *tracked source* changing, and for a getter that always
+    // returns a fresh array literal, that's always "changed" on every
+    // re-run regardless of the array's contents. A caller writing
+    // `:speeds="[1, 1.5, 2]"` inline in a template (common) gets a new
+    // array reference on every parent re-render even when the values
+    // don't change — watching `props.speeds` (directly, or joined *inside*
+    // the array above) would destroy and rebuild the whole player (losing
+    // playback position) on every unrelated re-render. A plain string
+    // source doesn't have that problem: Vue compares primitives by value.
+    watch(() => props.speeds?.join(','), recreate);
 
     return () =>
       h('div', [h('audio', { ref: audioEl }), h('div', { ref: containerEl })]);

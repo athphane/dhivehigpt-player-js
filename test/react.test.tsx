@@ -36,4 +36,29 @@ describe('DhivehiGPTPlayer (React)', () => {
     rerender(<DhivehiGPTPlayer src="https://example.com/b.mp3" onReady={onReady} />);
     expect(onReady).toHaveBeenCalledTimes(2);
   });
+
+  it('does not recreate the player when an inline `speeds` array literal is passed and the parent re-renders with the same values', () => {
+    // A new array reference every render (e.g. `speeds={[1, 1.5, 2]}`
+    // written inline in JSX, which is extremely common) must not be
+    // mistaken for an actual config change — that would tear down and
+    // rebuild the player (losing playback position) on every unrelated
+    // parent re-render.
+    const onReady = vi.fn<(player: AudioPlayer) => void>();
+    const { rerender } = render(
+      <DhivehiGPTPlayer src="https://example.com/a.mp3" speeds={[1, 1.5, 2]} onReady={onReady} />,
+    );
+    rerender(<DhivehiGPTPlayer src="https://example.com/a.mp3" speeds={[1, 1.5, 2]} onReady={onReady} />);
+
+    expect(onReady).toHaveBeenCalledTimes(1);
+  });
+
+  it('does recreate the player when the `speeds` values actually change', () => {
+    const onReady = vi.fn<(player: AudioPlayer) => void>();
+    const { rerender } = render(
+      <DhivehiGPTPlayer src="https://example.com/a.mp3" speeds={[1, 1.5, 2]} onReady={onReady} />,
+    );
+    rerender(<DhivehiGPTPlayer src="https://example.com/a.mp3" speeds={[1, 2, 3]} onReady={onReady} />);
+
+    expect(onReady).toHaveBeenCalledTimes(2);
+  });
 });

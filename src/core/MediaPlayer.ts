@@ -227,9 +227,14 @@ export abstract class MediaPlayer {
     const up = () => {
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
     };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
+    // A drag can be interrupted without a pointerup (e.g. a mobile OS
+    // system dialog stealing the gesture) — without this, the window
+    // listeners above would never be cleaned up.
+    window.addEventListener('pointercancel', up);
   }
 
   // ---- theming --------------------------------------------------------------
@@ -260,40 +265,60 @@ export abstract class MediaPlayer {
   }
 
   // ---- rendering --------------------------------------------------------------
+  // Cache of what's currently reflected in the DOM, so render() — called on
+  // every 'timeupdate' (roughly 4x/second during playback) — only touches
+  // the handful of properties (seek/volume fill) that legitimately change
+  // every tick, instead of re-parsing icon markup and rewriting text nodes
+  // that are almost always identical to last time.
+  private lastRender: {
+    icon: string;
+    ariaLabel: string;
+    timeText: string;
+    speedText: string;
+    volumeIcon: string;
+    volumeAriaLabel: string;
+    seekPct: string;
+    volumePct: string;
+  } | null = null;
+
   private render(): void {
-    for (const bar of this.bars()) this.renderBar(bar);
-  }
-
-  private renderBar(bar: Bar): void {
-    const { btn, seekFill, time, speed, volumeBtn, volumeFill } = bar.els;
-
+    // Computed once per render() call, not once per bar — with a sticky
+    // bar both mirror the same state, so there's no reason to format the
+    // same strings/markup twice.
+    const icon = this.intendedPlaying ? ICON_PAUSE : ICON_PLAY;
     // The icon reflects `intendedPlaying` (updated synchronously the
     // instant play()/pause() is called), not `state.playing` (which only
     // updates once the media element's event actually fires). Otherwise
     // the icon can lag behind a click by however long that event takes,
     // making a real click look like it didn't register and inviting a
     // confused second click that flips the intent right back.
-    btn.innerHTML = this.intendedPlaying ? ICON_PAUSE : ICON_PLAY;
-    btn.setAttribute('aria-label', this.intendedPlaying ? 'Pause' : 'Play');
+    const ariaLabel = this.intendedPlaying ? 'Pause' : 'Play';
+    const timeText = `${formatTime(this.state.currentTime)} / ${formatTime(this.state.duration)}`;
+    const speedText = `${this.state.rate}×`;
+    const volumeIcon = iconVolume(this.state.volume);
+    const volumeAriaLabel = this.state.volume > 0 ? 'Mute' : 'Unmute';
+    const seekRatio = this.state.duration ? (100 * this.state.currentTime) / this.state.duration : 0;
+    const seekPct = `${seekRatio.toFixed(2)}%`;
+    const volumePct = `${(100 * this.state.volume).toFixed(0)}%`;
 
-    const pct = this.state.duration ? (100 * this.state.currentTime) / this.state.duration : 0;
-    seekFill.style.width = `${pct.toFixed(2)}%`;
+    const prev = this.lastRender;
 
-    if (time) {
-      time.textContent = `${formatTime(this.state.currentTime)} / ${formatTime(this.state.duration)}`;
+    for (const bar of this.bars()) {
+      const { btn, seekFill, time, speed, volumeBtn, volumeFill } = bar.els;
+
+      if (!prev || prev.icon !== icon) btn.innerHTML = icon;
+      if (!prev || prev.ariaLabel !== ariaLabel) btn.setAttribute('aria-label', ariaLabel);
+      if (!prev || prev.seekPct !== seekPct) seekFill.style.width = seekPct;
+      if (time && (!prev || prev.timeText !== timeText)) time.textContent = timeText;
+      if (speed && (!prev || prev.speedText !== speedText)) speed.textContent = speedText;
+      if (volumeBtn) {
+        if (!prev || prev.volumeIcon !== volumeIcon) volumeBtn.innerHTML = volumeIcon;
+        if (!prev || prev.volumeAriaLabel !== volumeAriaLabel) volumeBtn.setAttribute('aria-label', volumeAriaLabel);
+      }
+      if (volumeFill && (!prev || prev.volumePct !== volumePct)) volumeFill.style.width = volumePct;
     }
 
-    if (speed) {
-      speed.textContent = `${this.state.rate}×`;
-    }
-
-    if (volumeBtn) {
-      volumeBtn.innerHTML = iconVolume(this.state.volume);
-      volumeBtn.setAttribute('aria-label', this.state.volume > 0 ? 'Mute' : 'Unmute');
-    }
-    if (volumeFill) {
-      volumeFill.style.width = `${(100 * this.state.volume).toFixed(0)}%`;
-    }
+    this.lastRender = { icon, ariaLabel, timeText, speedText, volumeIcon, volumeAriaLabel, seekPct, volumePct };
   }
 
   // ---- sticky-on-play (animated slide up/down) -------------------------------
