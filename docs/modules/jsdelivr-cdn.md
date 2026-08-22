@@ -21,7 +21,7 @@ The script is a self-contained UMD bundle (no other files are fetched) that:
 `@javaabu/dhivehigpt-player` (no version) always resolves to the latest release. Pin a specific version for production use:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@javaabu/dhivehigpt-player@1.0.0/dist/dhivehigpt-player.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@javaabu/dhivehigpt-player@1.1.0/dist/dhivehigpt-player.umd.min.js"></script>
 ```
 
 ## Using the global programmatically
@@ -42,4 +42,4 @@ If you'd rather self-host the file than depend on jsDelivr, the same self-contai
 <script src="https://raw.githubusercontent.com/Javaabu/dhivehigpt-player-js/main/dist/dhivehigpt-player.umd.min.js"></script>
 ```
 
-Swap `main` for a release tag (e.g. `v1.0.0`) to pin a version, the same way you'd pin a jsDelivr version above.
+Swap `main` for a release tag (e.g. `v1.1.0`) to pin a version, the same way you'd pin a jsDelivr version above.

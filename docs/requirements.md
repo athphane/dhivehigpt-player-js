@@ -25,3 +25,4 @@ A few specific compatibility notes:
 - Flexbox `gap` isn't used (Safari < 14.1 lacks it) — spacing is done with margins instead.
 - Auto dark mode falls back from `MediaQueryList.addEventListener` to the legacy `addListener`/`removeListener` pair on browsers that only support the older API (older Safari).
 - `-webkit-user-select` is included alongside the unprefixed `user-select` for older Safari.
+- The [responsive layout](./modules/styling-and-theming#responsive-layout)'s container-query behavior (Safari 16+, Chrome 105+, Firefox 110+ — newer than this library's general baseline) is a progressive enhancement: browsers without it still get the same reflow, keyed to the viewport width via a `@media` fallback instead of the bar's own width.

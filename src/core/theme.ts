@@ -16,6 +16,7 @@ export interface ThemeVars {
   '--radius': string;
   '--border': string;
   '--shadow': string;
+  '--sticky-shadow': string;
 }
 
 function shadowValue(variant: ShadowVariant, dark: boolean, line: string): string {
@@ -46,6 +47,16 @@ export function computeThemeVars(options: PlayerOptions, isDarkActive: boolean):
   const flush = !!options.flush;
   const mute = dark ? 'rgba(255,255,255,.6)' : 'rgba(17,20,20,.7)';
   const line = accent ? 'rgba(255,255,255,.34)' : dark ? 'rgba(255,255,255,.14)' : 'rgba(17,20,20,.12)';
+  // The same upward shadow + top hairline used for `flush`, but applied to
+  // the sticky bar unconditionally: it needs *some* visual separation from
+  // the page it's floating over regardless of the developer's chosen
+  // `shadow`/`flush` option for the inline bar — otherwise it's invisible
+  // against a same-colored background, which is exactly the "hairline"
+  // (the default) + non-flush case.
+  const stickyShadow =
+    dark || accent
+      ? '0 -8px 24px -12px rgba(0,0,0,.8), 0 -1px 0 rgba(255,255,255,.12)'
+      : '0 -8px 24px -14px rgba(17,20,20,.35), 0 -1px 0 rgba(17,20,20,.1)';
 
   return {
     '--bg': accent ? '#39bbb0' : dark ? '#16191a' : '#ffffff',
@@ -64,11 +75,8 @@ export function computeThemeVars(options: PlayerOptions, isDarkActive: boolean):
     '--track': accent ? 'rgba(255,255,255,.32)' : dark ? 'rgba(255,255,255,.16)' : 'rgba(17,20,20,.11)',
     '--radius': flush ? '0px' : '10px',
     '--border': flush ? '0' : options.shadow === 'none' ? '1px solid transparent' : `1px solid ${line}`,
-    '--shadow': flush
-      ? dark || accent
-        ? '0 -8px 24px -12px rgba(0,0,0,.8), 0 -1px 0 rgba(255,255,255,.12)'
-        : '0 -8px 24px -14px rgba(17,20,20,.35), 0 -1px 0 rgba(17,20,20,.1)'
-      : shadowValue(options.shadow, dark, line),
+    '--shadow': flush ? stickyShadow : shadowValue(options.shadow, dark, line),
+    '--sticky-shadow': stickyShadow,
   };
 }
 

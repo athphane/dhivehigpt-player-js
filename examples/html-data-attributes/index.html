@@ -46,6 +46,19 @@
     src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
   ></audio>
 
+  <h2>Responsive layout</h2>
+  <p>
+    The bar measures its own container width (CSS container queries, not the viewport). Below 430px
+    it switches to two rows aligned to the play button; below 260px the credit text and volume
+    slider drop to icon-only.
+  </p>
+  <div style="width: 320px; border: 1px dashed #ccc; padding: 8px;">
+    <audio
+      data-dhivehigpt-player
+      src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
+    ></audio>
+  </div>
+
   <h2>Sticky-to-bottom while playing</h2>
   <p>Press play, then scroll — the bar slides up and sticks to the bottom of the screen, and stays there through pause. Use the stop button to dismiss it.</p>
   <audio

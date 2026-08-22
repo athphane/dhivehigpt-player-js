@@ -2,6 +2,12 @@
 
 All notable changes to `@javaabu/dhivehigpt-player` will be documented in this file.
 
+## 1.1.0
+
+- Responsive layout: the bar reflows based on its own container width (CSS container queries, with a viewport `@media` fallback for browsers without support) rather than the page viewport, so it works correctly in narrow sidebars/cards too. Below 430px it switches to a two-row layout — seek + time on top, speed/volume/credit on the bottom, both aligned to the play button; below 260px the credit text and volume slider drop to icon-only. The bar stays the same height at every width.
+- New `attachTo(container)` method for moving the inline bar into a container — the correct way to do it from framework wrappers, since a plain `container.appendChild(player.element)` leaves behind the wrapper element the responsive layout depends on. The React, Vue, and Svelte integrations now use it internally.
+- The sticky bar's stop button is now a hollow (outlined, transparent) button, matching the design.
+
 ## 1.0.0
 
 Initial release.

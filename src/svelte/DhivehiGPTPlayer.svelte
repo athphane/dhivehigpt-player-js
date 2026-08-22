@@ -35,7 +35,7 @@
   function create() {
     if (!audioEl) return;
     player = new AudioPlayer(audioEl, buildOptions());
-    containerEl?.appendChild(player.element);
+    if (containerEl) player.attachTo(containerEl);
     dispatch('ready', player);
   }
 

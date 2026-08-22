@@ -48,7 +48,7 @@ export const DhivehiGPTPlayer = defineComponent({
     function create() {
       if (!audioEl.value) return;
       player = new AudioPlayer(audioEl.value, buildOptions());
-      containerEl.value?.appendChild(player.element);
+      if (containerEl.value) player.attachTo(containerEl.value);
       emit('ready', player);
     }
 

@@ -334,6 +334,17 @@ describe('AudioPlayer', () => {
     player.destroy();
   });
 
+  it('the sticky bar always has a visible shadow, even with default (non-flush, hairline) options — it floats over the page and needs separation regardless of the inline bar\'s configured shadow', () => {
+    const player = new AudioPlayer(audio, { sticky: true }); // shadow/flush left at their defaults
+    player.play();
+
+    const shadow = getComputedStyle(player.stickyElement!).boxShadow;
+    expect(shadow).not.toBe('none');
+    expect(shadow).not.toBe('');
+
+    player.destroy();
+  });
+
   it('does not build a sticky bar when sticky is disabled (default)', () => {
     const player = new AudioPlayer(audio);
     expect(player.stickyElement).toBeNull();
@@ -491,5 +502,76 @@ describe('AudioPlayer', () => {
     } finally {
       window.matchMedia = originalMatchMedia;
     }
+  });
+
+  describe('attachTo', () => {
+    it('moves the container-query wrapper (not just the bar) into the target container', () => {
+      // Moving `player.element` (the `.dhivehigpt-player` bar) alone would
+      // leave the plain wrapper that carries `container-type: inline-size`
+      // behind in its original spot — silently breaking the bar's
+      // responsive layout once it's re-parented, since a @container query
+      // needs an ancestor that's actually still wrapping it. attachTo()
+      // must move that ancestor along with the bar.
+      const player = new AudioPlayer(audio);
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+
+      player.attachTo(container);
+
+      expect(container.contains(player.element)).toBe(true);
+      // The immediate parent moved into `container` must be the wrapper,
+      // not the bar itself directly under `container`.
+      expect(player.element.parentElement).not.toBe(container);
+      expect(container.contains(player.element.parentElement)).toBe(true);
+
+      player.destroy();
+    });
+  });
+
+  describe('narrow-width grid layout (--narrow-areas / --narrow-columns)', () => {
+    // The narrow (<=430px) layout is CSS Grid, with grid-template-areas/
+    // columns computed per instance (via these two custom properties) since
+    // which of time/speed/volume exist varies independently per config —
+    // reserving a fixed area for an absent control would waste gap space.
+    // Row 1 (top, aligned with the play button's top) is [seek, time?];
+    // row 2 (bottom, aligned with the play button's bottom) is
+    // [speed?, volume?, credit]. Row-2's left controls get content-sized
+    // columns, then one flexible filler column, then a content-sized column
+    // for time — seek spans the left-control columns plus the filler so it
+    // takes all the slack, and credit spans filler + time, right-aligned.
+
+    it('full controls: seek spans the speed/volume/filler columns, time gets its own column at the far right', () => {
+      const player = new AudioPlayer(audio); // time, speed, volume all default on
+      const style = player.element.getAttribute('style') ?? '';
+      expect(style).toContain('--narrow-areas: "btn seek seek seek time" "btn speed volume credit credit";');
+      expect(style).toContain('--narrow-columns: auto auto auto minmax(0,1fr) auto;');
+      player.destroy();
+    });
+
+    it('minimal controls (no time/speed/volume): a single filler column holds seek over credit — no reserved empty tracks', () => {
+      const player = new AudioPlayer(audio, { showTime: false, showSpeed: false, showVolume: false });
+      const style = player.element.getAttribute('style') ?? '';
+      expect(style).toContain('--narrow-areas: "btn seek" "btn credit";');
+      expect(style).toContain('--narrow-columns: auto minmax(0,1fr);');
+      player.destroy();
+    });
+
+    it('time shown but speed/volume hidden: seek keeps the filler column, credit spans filler + time', () => {
+      const player = new AudioPlayer(audio, { showSpeed: false, showVolume: false });
+      const style = player.element.getAttribute('style') ?? '';
+      expect(style).toContain('--narrow-areas: "btn seek time" "btn credit credit";');
+      expect(style).toContain('--narrow-columns: auto minmax(0,1fr) auto;');
+      player.destroy();
+    });
+
+    it('sticky bar reserves a stop column, prefixed on both rows', () => {
+      const player = new AudioPlayer(audio, { sticky: true });
+      const style = player.stickyElement!.getAttribute('style') ?? '';
+      expect(style).toContain(
+        '--narrow-areas: "btn stop seek seek seek time" "btn stop speed volume credit credit";',
+      );
+      expect(style).toContain('--narrow-columns: auto auto auto auto minmax(0,1fr) auto;');
+      player.destroy();
+    });
   });
 });

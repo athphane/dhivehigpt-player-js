@@ -88,6 +88,46 @@
   </section>
 
   <section>
+    <h2>Responsive layout</h2>
+    <p class="desc">
+      The bar measures its own container width (via CSS container queries, not the viewport), so it
+      reflows the same way in a narrow sidebar as it does on a phone. Below 430px it switches to two
+      rows — seek + time on top, speed/volume/credit on the bottom, both aligned to the play button;
+      below 260px the credit text and volume slider drop to icon-only. Resize your window, or just
+      compare the three widths below.
+    </p>
+    <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start;">
+      <div>
+        <p class="desc" style="margin-bottom: 6px;">340px</p>
+        <div style="width: 340px; border: 1px dashed #ccc; padding: 8px;">
+          <audio
+            data-dhivehigpt-player
+            src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
+          ></audio>
+        </div>
+      </div>
+      <div>
+        <p class="desc" style="margin-bottom: 6px;">320px</p>
+        <div style="width: 320px; border: 1px dashed #ccc; padding: 8px;">
+          <audio
+            data-dhivehigpt-player
+            src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
+          ></audio>
+        </div>
+      </div>
+      <div>
+        <p class="desc" style="margin-bottom: 6px;">240px (icon-only)</p>
+        <div style="width: 240px; border: 1px dashed #ccc; padding: 8px;">
+          <audio
+            data-dhivehigpt-player
+            src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
+          ></audio>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
     <h2>Sticky-to-bottom while playing</h2>
     <p class="desc">
       Press play, then scroll — a second bar animates up from the bottom of the screen and stays

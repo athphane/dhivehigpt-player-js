@@ -36,6 +36,19 @@ interface BarEls {
 }
 
 interface Bar {
+  /**
+   * A plain wrapper that establishes the CSS container-query context
+   * (`container-type: inline-size`) around `root`. This can't live on
+   * `root` itself: a `@container` rule that changes `root`'s own `display`
+   * (flex -> grid, for the narrow layout) in response to `root`'s own
+   * size is exactly the self-referential case browsers guard against —
+   * verified empirically, not just theoretically: with container-type on
+   * `root` directly, the volume-slider-hiding rule (an unrelated child,
+   * `display:none`) applied fine, but the flex->grid switch on `root`
+   * itself silently never took effect. A separate, stable wrapper avoids
+   * the circularity entirely.
+   */
+  wrapper: HTMLDivElement;
   root: HTMLDivElement;
   els: BarEls;
 }
@@ -91,7 +104,7 @@ export abstract class MediaPlayer {
     if (this.options.loadFont) injectFontLink(host.ownerDocument ?? document);
 
     this.bar = this.buildBar(false);
-    this.host.insertAdjacentElement('afterend', this.bar.root);
+    this.host.insertAdjacentElement('afterend', this.bar.wrapper);
 
     if (this.options.sticky) {
       this.stickyBar = this.buildBar(true);
@@ -115,8 +128,15 @@ export abstract class MediaPlayer {
 
   // ---- DOM construction ---------------------------------------------------
   private buildBar(withStop: boolean): Bar {
+    // See the `Bar.wrapper` doc comment for why this exists as a separate
+    // element from `root` rather than putting container-type on `root`
+    // itself.
+    const wrapper = document.createElement('div');
+    wrapper.className = 'dhivehigpt-player-wrap';
+
     const root = document.createElement('div');
     root.className = 'dhivehigpt-player';
+    wrapper.appendChild(root);
 
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -130,6 +150,7 @@ export abstract class MediaPlayer {
     // pause/ended. The inline bar never has one.
     let stopBtn: HTMLButtonElement | null = null;
     if (withStop) {
+      root.classList.add('dhivehigpt-player--has-stop');
       stopBtn = document.createElement('button');
       stopBtn.type = 'button';
       stopBtn.className = 'dhivehigpt-player__stop';
@@ -218,7 +239,51 @@ export abstract class MediaPlayer {
     credit.appendChild(logo);
     root.appendChild(credit);
 
-    return { root, els: { btn, stopBtn, seekFill, time, speed, volumeBtn, volumeFill } };
+    // The narrow (<=430px) layout switches to a 2-row CSS grid — see the
+    // `@container`/`@media` rules in styles.ts. Play (and stop, if present)
+    // stay anchored on the left spanning both rows; the seek bar and time
+    // sit on row 1, speed/volume/credit on row 2. --narrow-areas and
+    // --narrow-columns are computed per instance because which of
+    // time/speed/volume exist varies independently, so a single static
+    // grid-template-areas can't cover every combination without reserving
+    // empty, gap-wasting tracks for whichever are absent.
+    //
+    // Column scheme (after btn/stop): one content-sized column per row-2
+    // left control (speed, volume), then a single flexible filler column,
+    // then a content-sized column for time if it's shown. Rows then map on:
+    //
+    //   row 1:  seek ......................... spans every left-control
+    //           column plus the filler, so it soaks up all the slack | time
+    //   row 2:  speed | volume | credit ...... spans filler + time column,
+    //           right-aligned so its edge lands on time's
+    //
+    // Sizing the left-control columns to their content (rather than making
+    // them all `1fr`) is what keeps the seek bar long and stops a dead gap
+    // opening between the seek bar's end and the time label: time gets a
+    // column of exactly its own width at the far right, instead of sharing
+    // an `auto` column sized to the much wider credit block.
+    const leftCtrls = [speed && 'speed', volumeBtn && 'volume'].filter((x): x is string => !!x);
+    const prefix = withStop ? ['btn', 'stop'] : ['btn'];
+
+    const row1 = [...leftCtrls.map(() => 'seek'), 'seek', ...(time ? ['time'] : [])];
+    const row2 = [...leftCtrls, 'credit', ...(time ? ['credit'] : [])];
+
+    root.style.setProperty('--narrow-areas', `"${[...prefix, ...row1].join(' ')}" "${[...prefix, ...row2].join(' ')}"`);
+    // minmax(0,1fr), not bare 1fr: a bare `fr` track's automatic minimum
+    // size is content-based, so the filler column would refuse to shrink
+    // below the seek bar's min-content width and overflow the container at
+    // very narrow widths. minmax(0,1fr) lets it actually go to 0.
+    root.style.setProperty(
+      '--narrow-columns',
+      [
+        ...prefix.map(() => 'auto'),
+        ...leftCtrls.map(() => 'auto'),
+        'minmax(0,1fr)',
+        ...(time ? ['auto'] : []),
+      ].join(' '),
+    );
+
+    return { wrapper, root, els: { btn, stopBtn, seekFill, time, speed, volumeBtn, volumeFill } };
   }
 
   private drag(event: PointerEvent, el: HTMLElement, apply: (ratio: number) => void): void {
@@ -345,9 +410,9 @@ export abstract class MediaPlayer {
     if (!this.stickyBar) return;
     this.clearStickyCleanup();
 
-    const { root } = this.stickyBar;
-    if (!root.isConnected) {
-      (this.host.ownerDocument ?? document).body.appendChild(root);
+    const { wrapper, root } = this.stickyBar;
+    if (!wrapper.isConnected) {
+      (this.host.ownerDocument ?? document).body.appendChild(wrapper);
     }
     root.classList.add('dhivehigpt-player--sticky');
     // Force a layout flush so the browser registers the off-screen starting
@@ -359,7 +424,7 @@ export abstract class MediaPlayer {
   /** Slides the sticky bar back down out of view, then removes it from the document entirely. */
   private exitSticky(): void {
     if (!this.stickyBar) return;
-    const { root } = this.stickyBar;
+    const { wrapper, root } = this.stickyBar;
     if (!root.classList.contains('dhivehigpt-player--sticky')) return;
     this.clearStickyCleanup();
 
@@ -367,7 +432,7 @@ export abstract class MediaPlayer {
 
     const finish = () => {
       root.classList.remove('dhivehigpt-player--sticky');
-      root.remove();
+      wrapper.remove();
       this.clearStickyCleanup();
     };
     this.stickyTransitionListener = (e: TransitionEvent) => {
@@ -499,6 +564,23 @@ export abstract class MediaPlayer {
     return this.stickyBar?.root ?? null;
   }
 
+  /**
+   * Moves the inline bar into `container` (e.g. so it renders inside a
+   * framework component's own subtree instead of as a stray sibling of the
+   * host `<audio>` element — used by the React/Vue/Svelte wrappers).
+   *
+   * Prefer this over `container.appendChild(player.element)`: `element` is
+   * the actual `.dhivehigpt-player` bar, but moving *that* alone would
+   * leave behind the plain wrapper element around it that establishes the
+   * bar's CSS container-query context (how the [responsive
+   * layout](../docs/modules/styling-and-theming.md#responsive-layout)
+   * knows the bar's own width, not the viewport's) — breaking it silently
+   * in its new location. This moves the pair together.
+   */
+  attachTo(container: HTMLElement): void {
+    container.appendChild(this.bar.wrapper);
+  }
+
   // ---- state hooks for subclasses to report media events --------------------
   protected onPlay(): void {
     // Deliberately does NOT set `intendedPlaying = true` here. 'play' can
@@ -574,8 +656,8 @@ export abstract class MediaPlayer {
     this.darkMediaQueryListener = null;
     this.clearStickyCleanup();
 
-    this.bar.root.remove();
-    this.stickyBar?.root.remove();
+    this.bar.wrapper.remove();
+    this.stickyBar?.wrapper.remove();
     this.emit('destroy', undefined);
     this.listeners = {};
   }

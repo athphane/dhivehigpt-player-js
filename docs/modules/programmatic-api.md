@@ -39,6 +39,7 @@ The second argument accepts the same options as the [data attributes](./data-att
 | `mute()` / `unmute()` | Mute, or restore the volume from before muting. |
 | `setPlaybackRate(rate)` | Set the playback rate directly. |
 | `cyclePlaybackRate()` | Advance to the next rate in `speeds`. |
+| `attachTo(container)` | Move the inline bar into `container`. Prefer this over `container.appendChild(player.element)` — moving `element` alone leaves behind the plain wrapper element that gives the bar its [responsive](./styling-and-theming#responsive-layout) container-query context, silently breaking it in the new location. This is how the React/Vue/Svelte wrappers mount the bar inside their own component subtree. |
 | `destroy()` | Remove the player and restore the original `<audio>` element. |
 
 ## Properties

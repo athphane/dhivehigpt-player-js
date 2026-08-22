@@ -60,7 +60,7 @@ export function DhivehiGPTPlayer({
       sticky,
       loadFont,
     });
-    containerRef.current?.appendChild(player.element);
+    if (containerRef.current) player.attachTo(containerRef.current);
     onReady?.(player);
 
     return () => player.destroy();

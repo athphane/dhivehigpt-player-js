@@ -38,6 +38,20 @@ describe('computeThemeVars', () => {
     expect(vars['--shadow']).toContain('-8px');
   });
 
+  it('always computes a sticky-shadow (upward shadow + hairline), regardless of the shadow/flush options — the sticky bar needs its own separation from the page it floats over even when not flush', () => {
+    const defaultOpts = computeThemeVars({ ...DEFAULT_OPTIONS, shadow: 'none', flush: false }, false);
+    expect(defaultOpts['--sticky-shadow']).toContain('-8px');
+
+    const dark = computeThemeVars({ ...DEFAULT_OPTIONS, shadow: 'none' }, true);
+    expect(dark['--sticky-shadow']).toContain('-8px');
+    expect(dark['--sticky-shadow']).not.toBe(defaultOpts['--sticky-shadow']);
+
+    const accent = computeThemeVars({ ...DEFAULT_OPTIONS, accent: true, shadow: 'none' }, false);
+    expect(accent['--sticky-shadow']).toContain('-8px');
+    // Accent uses the same (dark-surface-appropriate) shadow as dark mode.
+    expect(accent['--sticky-shadow']).toBe(dark['--sticky-shadow']);
+  });
+
   it('supports all shadow variants', () => {
     for (const shadow of ['none', 'hairline', 'soft', 'lift'] as const) {
       const vars = computeThemeVars({ ...DEFAULT_OPTIONS, shadow }, false);
