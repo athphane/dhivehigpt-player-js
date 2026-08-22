@@ -63,7 +63,7 @@ export abstract class MediaPlayer {
   // updates once the media element's 'play'/'pause' event actually fires,
   // which is asynchronous for play() — using it to decide what a rapid
   // second click should do is racy (see toggle()).
-  private intendedPlaying = false;
+  protected intendedPlaying = false;
 
   protected host: HTMLElement;
   /** The inline control bar — stays in the page's normal flow at all times. */
@@ -267,8 +267,14 @@ export abstract class MediaPlayer {
   private renderBar(bar: Bar): void {
     const { btn, seekFill, time, speed, volumeBtn, volumeFill } = bar.els;
 
-    btn.innerHTML = this.state.playing ? ICON_PAUSE : ICON_PLAY;
-    btn.setAttribute('aria-label', this.state.playing ? 'Pause' : 'Play');
+    // The icon reflects `intendedPlaying` (updated synchronously the
+    // instant play()/pause() is called), not `state.playing` (which only
+    // updates once the media element's event actually fires). Otherwise
+    // the icon can lag behind a click by however long that event takes,
+    // making a real click look like it didn't register and inviting a
+    // confused second click that flips the intent right back.
+    btn.innerHTML = this.intendedPlaying ? ICON_PAUSE : ICON_PLAY;
+    btn.setAttribute('aria-label', this.intendedPlaying ? 'Pause' : 'Play');
 
     const pct = this.state.duration ? (100 * this.state.currentTime) / this.state.duration : 0;
     seekFill.style.width = `${pct.toFixed(2)}%`;
@@ -365,11 +371,13 @@ export abstract class MediaPlayer {
   // ---- public playback API --------------------------------------------------
   play(): void {
     this.intendedPlaying = true;
+    this.render(); // update the icon immediately — don't wait for the 'play' event
     this.mediaPlay();
   }
 
   pause(): void {
     this.intendedPlaying = false;
+    this.render(); // update the icon immediately — don't wait for the 'pause' event
     this.mediaPause();
   }
 
@@ -468,7 +476,14 @@ export abstract class MediaPlayer {
 
   // ---- state hooks for subclasses to report media events --------------------
   protected onPlay(): void {
-    this.intendedPlaying = true;
+    // Deliberately does NOT set `intendedPlaying = true` here. 'play' can
+    // fire well after the request that triggered it — if a pause() issued
+    // in between already set intent back to false, a late 'play' event
+    // from the *earlier* request clobbering it back to true would
+    // permanently defeat the "did it actually start playing anyway"
+    // safety net (it checks intendedPlaying to decide whether to correct
+    // course). pause()/toggle() calls are the only things allowed to set
+    // it true, since they're synchronous with the actual user action.
     this.state.playing = true;
     this.render();
     this.enterSticky();

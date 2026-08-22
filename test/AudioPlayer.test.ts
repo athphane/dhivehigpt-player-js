@@ -93,13 +93,111 @@ describe('AudioPlayer', () => {
     const pauseSpy = vi.spyOn(audio, 'pause');
 
     const player = new AudioPlayer(audio);
+    const btn = q<HTMLButtonElement>(player, '.dhivehigpt-player__btn');
+
     player.toggle(); // starts play(); 'play' event/state.playing update is still pending
     expect(player.playing).toBe(false); // event hasn't fired yet
+    // The icon updates immediately regardless — this is what stops a user
+    // from thinking their click didn't register and clicking again.
+    expect(btn.getAttribute('aria-label')).toBe('Pause');
 
     player.toggle(); // should pause, not call play() again
     expect(pauseSpy).toHaveBeenCalledTimes(1);
+    expect(btn.getAttribute('aria-label')).toBe('Play');
 
     firePlayEvent?.();
+    player.destroy();
+  });
+
+  it('the play/pause icon updates synchronously on click, without waiting for the confirming media event', () => {
+    // Unlike the mock's play()/pause() (which happen to fire their events
+    // synchronously), real browsers queue those events as an async task —
+    // this test only relies on the icon reflecting the call itself, not on
+    // state.playing, so it holds regardless of that timing.
+    const player = new AudioPlayer(audio);
+    const btn = q<HTMLButtonElement>(player, '.dhivehigpt-player__btn');
+    expect(btn.getAttribute('aria-label')).toBe('Play');
+
+    player.play();
+    expect(btn.getAttribute('aria-label')).toBe('Pause');
+
+    player.pause();
+    expect(btn.getAttribute('aria-label')).toBe('Play');
+
+    player.destroy();
+  });
+
+  it('re-asserts pause() if the browser fires "playing" (actual playback starting) after intent was already set back to paused', () => {
+    // Real browsers don't reliably honor pause() called while a play()
+    // request is still buffering/pending — 'playing' (which fires exactly
+    // when playback actually starts rendering) can still land after intent
+    // was already flipped back to paused. Simulate that directly: dispatch
+    // 'playing' as the browser would, independent of any promise timing.
+    const setPaused = (value: boolean) => Object.defineProperty(audio, 'paused', { value, configurable: true });
+    setPaused(true);
+    const pauseSpy = vi.spyOn(audio, 'pause').mockImplementation(() => setPaused(true));
+
+    const player = new AudioPlayer(audio);
+    player.play();
+    player.pause(); // intent is now "paused"
+    pauseSpy.mockClear(); // ignore the direct mediaPause() call from pause() itself
+
+    // The browser starts actual playback anyway, despite the pause() above.
+    setPaused(false);
+    audio.dispatchEvent(new Event('playing'));
+
+    expect(pauseSpy).toHaveBeenCalledTimes(1);
+    player.destroy();
+  });
+
+  it('does not fight a genuine, currently-intended play when "playing" fires normally', () => {
+    const pauseSpy = vi.spyOn(audio, 'pause');
+    const player = new AudioPlayer(audio);
+
+    player.play();
+    audio.dispatchEvent(new Event('playing'));
+
+    expect(pauseSpy).not.toHaveBeenCalled();
+    player.destroy();
+  });
+
+  it('a stale "play" event arriving after a newer pause() does not clobber the pause intent (which would silently defeat the "playing" safety net)', () => {
+    // 'play' just means the request was accepted, not that audio is
+    // actually rendering yet (that's 'playing') — it can fire late,
+    // possibly after a subsequent pause() already changed what's wanted.
+    const pauseSpy = vi.spyOn(audio, 'pause');
+    const player = new AudioPlayer(audio);
+
+    player.play(); // request #1
+    player.pause(); // user changed their mind before request #1's 'play' event arrived
+    pauseSpy.mockClear();
+
+    audio.dispatchEvent(new Event('play')); // late event from request #1
+    // Intent must still read "paused" — otherwise a later 'playing' event
+    // (the browser actually starting playback anyway) would be treated as
+    // expected and never get corrected.
+    audio.dispatchEvent(new Event('playing'));
+
+    expect(pauseSpy).toHaveBeenCalledTimes(1);
+    player.destroy();
+  });
+
+  it('timeupdate also re-asserts pause() as a continuous safety net, independent of the "playing" event', () => {
+    const setPaused = (value: boolean) => Object.defineProperty(audio, 'paused', { value, configurable: true });
+    const pauseSpy = vi.spyOn(audio, 'pause').mockImplementation(() => setPaused(true));
+
+    const player = new AudioPlayer(audio);
+    player.play();
+    player.pause();
+    pauseSpy.mockClear();
+
+    // Audio is actually still advancing/playing despite pause() above —
+    // 'timeupdate' fires as it does during real playback, without a
+    // 'playing' event in between.
+    setPaused(false);
+    audio.dispatchEvent(new Event('timeupdate'));
+
+    expect(pauseSpy).toHaveBeenCalledTimes(1);
     player.destroy();
   });
 

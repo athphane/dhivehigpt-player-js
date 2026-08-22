@@ -7,6 +7,8 @@
 
 A lightweight, dependency-free audio player for [DhivehiGPT](https://dhivehigpt.com)-generated "read aloud" audio. Turns a plain `<audio>` tag into a branded control bar, embeddable on any website — no build step required.
 
+**[Live demo](https://javaabu.github.io/dhivehigpt-player-js/)**
+
 ## Documentation
 
 Full documentation: **[docs.javaabu.com/docs/dhivehigpt-player-js](https://docs.javaabu.com/docs/dhivehigpt-player-js)**

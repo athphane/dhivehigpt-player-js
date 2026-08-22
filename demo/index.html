@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>DhivehiGPT Player — Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Live demo of @javaabu/dhivehigpt-player, a lightweight audio player for DhivehiGPT read-aloud audio." />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      max-width: 720px;
+      margin: 48px auto;
+      padding: 0 20px 80px;
+      color: #111414;
+    }
+    h1 { margin-bottom: 4px; }
+    .subtitle { color: #6b7070; margin-top: 0; }
+    .links { margin: 20px 0 40px; display: flex; gap: 16px; flex-wrap: wrap; }
+    .links a { color: #39bbb0; text-decoration: none; font-weight: 500; }
+    .links a:hover { text-decoration: underline; }
+    section { margin-bottom: 40px; }
+    h2 { font-size: 16px; margin-bottom: 6px; }
+    p.desc { color: #6b7070; font-size: 14px; margin-top: 0; margin-bottom: 12px; }
+    code { background: #f4f4f4; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+    footer { color: #9b9e9e; font-size: 13px; margin-top: 60px; }
+  </style>
+</head>
+<body>
+  <h1>DhivehiGPT Player</h1>
+  <p class="subtitle">Lightweight, dependency-free audio player for DhivehiGPT read-aloud audio.</p>
+
+  <div class="links">
+    <a href="https://github.com/Javaabu/dhivehigpt-player-js">GitHub</a>
+    <a href="https://www.npmjs.com/package/@javaabu/dhivehigpt-player">npm</a>
+    <a href="https://docs.javaabu.com/docs/dhivehigpt-player-js">Documentation</a>
+  </div>
+
+  <section>
+    <h2>Default (light)</h2>
+    <p class="desc">Just <code>data-dhivehigpt-player</code> on a standard <code>&lt;audio&gt;</code> tag.</p>
+    <audio
+      data-dhivehigpt-player
+      src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
+    ></audio>
+  </section>
+
+  <section>
+    <h2>Accent skin</h2>
+    <p class="desc"><code>data-accent="true"</code> — the brand-teal filled skin.</p>
+    <audio
+      data-dhivehigpt-player
+      data-accent="true"
+      src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
+    ></audio>
+  </section>
+
+  <section>
+    <h2>Forced dark</h2>
+    <p class="desc"><code>data-dark="true"</code> — or leave it on <code>"auto"</code> (the default) to follow the visitor's OS setting.</p>
+    <audio
+      data-dhivehigpt-player
+      data-dark="true"
+      data-shadow="lift"
+      src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
+    ></audio>
+  </section>
+
+  <section>
+    <h2>Minimal controls</h2>
+    <p class="desc">Time, speed, and volume controls can each be toggled off individually.</p>
+    <audio
+      data-dhivehigpt-player
+      data-show-time="false"
+      data-show-speed="false"
+      data-show-volume="false"
+      src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
+    ></audio>
+  </section>
+
+  <section>
+    <h2>Custom playback speeds</h2>
+    <p class="desc"><code>data-speeds="0.5,1,1.5,2,3"</code></p>
+    <audio
+      data-dhivehigpt-player
+      data-speeds="0.5,1,1.5,2,3"
+      src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
+    ></audio>
+  </section>
+
+  <section>
+    <h2>Sticky-to-bottom while playing</h2>
+    <p class="desc">
+      Press play, then scroll — a second bar animates up from the bottom of the screen and stays
+      there through pause, dismissed only by its stop button. The bar above never moves.
+    </p>
+    <audio
+      data-dhivehigpt-player
+      data-sticky="true"
+      src="https://dvgpt.s3.ap-southeast-1.amazonaws.com/de2a034d-cf77-4f63-87f0-9849962bf0f5/c0346207-9382-4d54-8bb2-5b598ffe555d.wav"
+    ></audio>
+    <div style="height: 500px"></div>
+  </section>
+
+  <footer>
+    <a href="https://dhivehigpt.com">Powered by DhivehiGPT</a>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@javaabu/dhivehigpt-player/dist/dhivehigpt-player.umd.min.js"></script>
+</body>
+</html>

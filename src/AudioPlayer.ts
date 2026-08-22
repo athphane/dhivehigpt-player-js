@@ -51,6 +51,7 @@ export class AudioPlayer extends MediaPlayer {
     this.audio.addEventListener('timeupdate', this.handleTimeUpdate);
     this.audio.addEventListener('play', this.handlePlay);
     this.audio.addEventListener('pause', this.handlePause);
+    this.audio.addEventListener('playing', this.handlePlaying);
     this.audio.addEventListener('ended', this.handleEnded);
     this.audio.addEventListener('volumechange', this.handleVolumeChange);
     this.audio.addEventListener('ratechange', this.handleRateChange);
@@ -66,6 +67,13 @@ export class AudioPlayer extends MediaPlayer {
 
   private handleTimeUpdate = (): void => {
     this.onTimeUpdate(this.audio.currentTime, this.audio.duration || 0);
+    // Continuous safety net, on top of handlePlaying(): 'timeupdate' fires
+    // roughly every 250ms for as long as audio is actually advancing, so
+    // this catches (and corrects) intent/reality drift within a fraction
+    // of a second no matter the exact cause — belt and suspenders against
+    // browser play()/pause() race conditions that don't fit the specific
+    // pattern handlePlaying() targets.
+    if (!this.intendedPlaying && !this.audio.paused) this.audio.pause();
   };
 
   private handlePlay = (): void => {
@@ -74,6 +82,20 @@ export class AudioPlayer extends MediaPlayer {
 
   private handlePause = (): void => {
     this.onPause();
+  };
+
+  /**
+   * 'playing' fires exactly when the browser actually starts rendering
+   * audio — unlike 'play' (just the request being accepted), or resolving
+   * the play() promise (which doesn't reliably line up with playback
+   * really starting either). Browsers don't always honor a pause() called
+   * while a play() request was still buffering/pending, so this is the
+   * one signal that reliably catches "it started playing anyway despite
+   * being told to pause" regardless of exactly when/why that happens, and
+   * lets us immediately correct it.
+   */
+  private handlePlaying = (): void => {
+    if (!this.intendedPlaying) this.audio.pause();
   };
 
   private handleEnded = (): void => {
@@ -90,9 +112,11 @@ export class AudioPlayer extends MediaPlayer {
 
   protected mediaPlay(): void {
     this.audio.playbackRate = this.playbackRate;
-    void this.audio.play().catch(() => {
-      /* playback was prevented (autoplay policy, no user gesture yet, etc.) — state stays paused */
-    });
+    // A rejection here just means playback was prevented (autoplay policy,
+    // no user gesture yet, a pause() that raced it, etc.) — nothing to do,
+    // state stays paused. If it wasn't actually prevented and starts
+    // playing anyway, handlePlaying() catches and corrects that.
+    void this.audio.play().catch(() => {});
   }
 
   protected mediaPause(): void {
@@ -125,6 +149,7 @@ export class AudioPlayer extends MediaPlayer {
     this.audio.removeEventListener('timeupdate', this.handleTimeUpdate);
     this.audio.removeEventListener('play', this.handlePlay);
     this.audio.removeEventListener('pause', this.handlePause);
+    this.audio.removeEventListener('playing', this.handlePlaying);
     this.audio.removeEventListener('ended', this.handleEnded);
     this.audio.removeEventListener('volumechange', this.handleVolumeChange);
     this.audio.removeEventListener('ratechange', this.handleRateChange);
