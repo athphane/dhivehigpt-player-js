@@ -11,7 +11,7 @@ A lightweight, dependency-free audio player for [DhivehiGPT](https://dhivehigpt.
 
 ## Documentation
 
-Full documentation: **[docs.javaabu.com/docs/dhivehigpt-player-js](https://docs.javaabu.com/dhivehigpt-player-js)**
+Full documentation: **[docs.javaabu.com/dhivehigpt-player-js](https://docs.javaabu.com/dhivehigpt-player-js)**
 
 Find yourself stuck using the package? Found a bug? Feel free to create an [issue](../../issues) on GitHub, we'll try to address it as soon as possible.
 
